@@ -1,4 +1,4 @@
-test_application:
+assessment:
   domain: test.application.com
   namespace: prod
   replicaCount: 3
