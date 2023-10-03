@@ -1,0 +1,7 @@
+test_application:
+  domain: test.application.com
+  namespace: prod
+  replicaCount: 3
+  appname: test-application
+  port: 8001
+  targetPort: 8001
