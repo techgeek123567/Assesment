@@ -1,0 +1,118 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-application
+  namespace: prod
+  labels:
+    app: {{ template "app.fullname" . }}
+    service: test-application
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.assessment.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "app.fullname" . }}
+      service: test-application
+      release: {{ .Release.Name }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: {{ template "app.fullname" . }}
+        service: test-application
+        release: {{ .Release.Name }}
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 50
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    service: test-application
+                    revision: "{{ .Release.Revision }}"
+                topologyKey: "kubernetes.io/hostname"
+      volumes:
+        - name: nfs-volume
+          nfs:
+            server: abc.com
+            path: "/"
+            readOnly: false
+      containers:
+        - name: test-application
+          image: "{{ .Values.assessment.image }}"
+          imagePullPolicy: {{ .Values.assessment.pullPolicy }}
+          resources:
+            requests:
+              cpu: "1000m"
+              memory: 2000Mi
+            limits:
+              cpu: "1000m"
+              memory: 2000Mi
+          ports:
+          - name: http
+            containerPort: 8001
+          readinessProbe:
+            httpGet:
+              path: /assessment/health
+              port: 8001
+            initialDelaySeconds: 15
+            periodSeconds: 120
+          volumeMounts:
+            - name: nfs-volume
+              mountPath: /app/media
+
+          env:
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: assessment-prod
+                  key: DB_NAME
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: assessment-prod
+                  key: DB_PASSWORD
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: assessment-prod
+                  key: DB_USER
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: assessment-prod
+                  key: DB_HOST
+            - name: DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: assessment-prod
+                  key: DB_PORT
+      
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-application
+  labels:
+    app: {{ template "app.fullname" . }}
+    service: test-application
+    release: {{ .Release.Name }}
+
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8001
+      targetPort: 8001
+      protocol: TCP
+  selector:
+    app: {{ template "app.fullname" . }}
+    service: test-application
+    release: {{ .Release.Name }}
