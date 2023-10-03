@@ -109,8 +109,8 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-    - port: 8001
-      targetPort: 8001
+    - port: {{ .Values.assessment.port }}
+      targetPort: {{ .Values.assessment.targetPort }}
       protocol: TCP
   selector:
     app: {{ template "app.fullname" . }}
