@@ -10,3 +10,6 @@ To provision infrastructure i will be proposing Terraform by Harshicorp which is
 * Scalability: Terraform is suitable for managing infrastructure of all sizes, from small projects to large, complex environments. It scales well with your organization's infrastructure needs.
 * Security and Compliance: Terraform supports infrastructure security and compliance requirements by allowing you to define and enforce policies through code. You can ensure that security best practices are followed consistently across your infrastructure.
 * Extensibility: Terraform's open-source nature allows you to extend its functionality through custom providers and modules, making it adaptable to your unique infrastructure requirements.
+
+With the terraform templates we can set-up GKE private cluster and the current state is stored in GCS bucket. 
+Commands to run terraform init, terraform plan, terraform apply, terraform destroy, terraform show, terraform validate.
